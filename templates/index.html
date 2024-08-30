@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Classification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction:column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+        .warning {
+            color: orange;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Classification</h1>
+    <form id="textForm">
+        <label for="textInput">Enter text:</label><br>
+        <textarea id="textInput" rows="4" cols="50"></textarea><br><br>
+        <div class="button-container">
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('textForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const text = document.getElementById('textInput').value;
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                switch (data.prediction) {
+                    case 'suicide':
+                        resultDiv.textContent = `Prediction: ${data.prediction}`;
+                        resultDiv.className = 'error'; // Red for suicide
+                        break;
+                    case 'bully':
+                        resultDiv.textContent = `Prediction: ${data.prediction}`;
+                        resultDiv.className = 'warning'; // Orange for bullying
+                        break;
+                    case 'non-suicide':
+                    case 'non-bully':
+                        resultDiv.textContent = `Prediction: ${data.prediction}`;
+                        resultDiv.className = 'success'; // Green for positive/neutral
+                        break;
+                    default:
+                        resultDiv.textContent = `Prediction: Unknown`;
+                        resultDiv.className = 'success'; // Default to green for unknown
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = 'An error occurred. Please try again.';
+                resultDiv.className = 'error';
+            });
+        });
+    </script>
+</body>
+</html>
